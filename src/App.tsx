@@ -5,14 +5,12 @@ import {
   type FilterName,
   type PasteEllipseName,
 } from './config/constants'
-import { getPrimaryDefaceEndpoint } from './services/apiClient'
 import { processImage } from './services/imageService'
 
 const PRIMARY_FILTER = FILTER_NAMES[0]
 const PRIMARY_PASTE = PASTE_ELLIPSE_NAMES[0]
 
 function App() {
-  const endpoint = getPrimaryDefaceEndpoint()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [resultUrl, setResultUrl] = useState<string | null>(null)
@@ -88,9 +86,6 @@ function App() {
             <span className="h-px w-10 bg-cyan-300/70" aria-hidden />
           </div>
           <h1 className="text-5xl sm:text-6xl font-semibold text-deface-azure tracking-tight">Image Defacer</h1>
-          <p className="mx-auto max-w-3xl text-base leading-relaxed text-slate-200 sm:text-lg">
-            Ein schlanker Steuerbereich für das {FILTER_NAMES.join(', ')}-Filterset. Die visuelle Vorschau wird lokal gerendert, während das Backend unter {endpoint} für die eigentliche Bildverarbeitung sorgt.
-          </p>
           <div className="grid gap-4 md:grid-cols-2">
             <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left shadow-[0_20px_45px_-30px_rgba(15,23,42,0.8)] backdrop-blur">
               <p className="text-[0.65rem] uppercase tracking-[0.4em] text-cyan-200">Active filter</p>
@@ -127,8 +122,6 @@ function App() {
               </label>
             </article>
           </div>
-          <p className="text-xs uppercase tracking-[0.4em] text-cyan-200">Backend</p>
-          <p className="text-sm text-slate-300">{endpoint}</p>
         </section>
 
         <section className="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 shadow-2xl shadow-[0_20px_60px_-40px_rgba(15,23,42,0.9)] backdrop-blur-lg">
