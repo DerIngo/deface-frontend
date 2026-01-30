@@ -1,12 +1,12 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { FILTER_NAMES, PASTE_ELLIPSE_NAMES } from './config/constants'
+import {
+  FILTER_NAMES,
+  PASTE_ELLIPSE_NAMES,
+  type FilterName,
+  type PasteEllipseName,
+} from './config/constants'
 import { getPrimaryDefaceEndpoint } from './services/apiClient'
 import { processImage } from './services/imageService'
-
-const detailRows: Array<{ label: string; value: string }> = [
-  { label: 'Active filter', value: FILTER_NAMES.join(', ') },
-  { label: 'Paste style', value: PASTE_ELLIPSE_NAMES.join(', ') },
-]
 
 const PRIMARY_FILTER = FILTER_NAMES[0]
 const PRIMARY_PASTE = PASTE_ELLIPSE_NAMES[0]
@@ -18,6 +18,8 @@ function App() {
   const [resultUrl, setResultUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedFilter, setSelectedFilter] = useState<FilterName>(PRIMARY_FILTER)
+  const [selectedPaste, setSelectedPaste] = useState<PasteEllipseName>(PRIMARY_PASTE)
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0] ?? null
@@ -42,6 +44,14 @@ function App() {
     }
   }, [resultUrl])
 
+  const handleFilterChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedFilter(event.target.value as FilterName)
+  }
+
+  const handlePasteChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPaste(event.target.value as PasteEllipseName)
+  }
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!selectedFile) {
@@ -53,7 +63,7 @@ function App() {
     setError(null)
 
     try {
-      const url = await processImage(selectedFile, PRIMARY_FILTER, PRIMARY_PASTE)
+      const url = await processImage(selectedFile, selectedFilter, selectedPaste)
       setResultUrl((current) => {
         if (current) {
           URL.revokeObjectURL(current)
@@ -82,12 +92,40 @@ function App() {
             Ein schlanker Steuerbereich für das {FILTER_NAMES.join(', ')}-Filterset. Die visuelle Vorschau wird lokal gerendert, während das Backend unter {endpoint} für die eigentliche Bildverarbeitung sorgt.
           </p>
           <div className="grid gap-4 md:grid-cols-2">
-            {detailRows.map((detail) => (
-              <article key={detail.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left shadow-[0_20px_45px_-30px_rgba(15,23,42,0.8)] backdrop-blur">
-                <p className="text-[0.65rem] uppercase tracking-[0.4em] text-cyan-200">{detail.label}</p>
-                <p className="mt-3 text-lg font-medium text-white">{detail.value}</p>
-              </article>
-            ))}
+            <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left shadow-[0_20px_45px_-30px_rgba(15,23,42,0.8)] backdrop-blur">
+              <p className="text-[0.65rem] uppercase tracking-[0.4em] text-cyan-200">Active filter</p>
+              <label className="mt-4 block text-lg font-medium text-white">
+                <span className="sr-only">Active filter wählen</span>
+                <select
+                  value={selectedFilter}
+                  onChange={handleFilterChange}
+                  className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                >
+                  {FILTER_NAMES.map((filter) => (
+                    <option key={filter} value={filter} className="bg-slate-900 text-slate-100">
+                      {filter}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </article>
+            <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left shadow-[0_20px_45px_-30px_rgba(15,23,42,0.8)] backdrop-blur">
+              <p className="text-[0.65rem] uppercase tracking-[0.4em] text-cyan-200">Paste style</p>
+              <label className="mt-4 block text-lg font-medium text-white">
+                <span className="sr-only">Paste style wählen</span>
+                <select
+                  value={selectedPaste}
+                  onChange={handlePasteChange}
+                  className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                >
+                  {PASTE_ELLIPSE_NAMES.map((paste) => (
+                    <option key={paste} value={paste} className="bg-slate-900 text-slate-100">
+                      {paste}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </article>
           </div>
           <p className="text-xs uppercase tracking-[0.4em] text-cyan-200">Backend</p>
           <p className="text-sm text-slate-300">{endpoint}</p>
@@ -95,10 +133,10 @@ function App() {
 
         <section className="rounded-[32px] border border-white/10 bg-white/[0.03] p-8 shadow-2xl shadow-[0_20px_60px_-40px_rgba(15,23,42,0.9)] backdrop-blur-lg">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-cyan-200">Upload</p>
-              <p className="text-sm text-slate-300">Filter: {PRIMARY_FILTER} · Paste: {PRIMARY_PASTE}</p>
-            </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-cyan-200">Upload</p>
+                <p className="text-sm text-slate-300">Filter: {selectedFilter} · Paste: {selectedPaste}</p>
+              </div>
             <form className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4" onSubmit={handleSubmit}>
               <label className="flex-1">
                 <span className="sr-only">Bild auswählen</span>
@@ -130,7 +168,9 @@ function App() {
             <figure className="rounded-2xl border border-white/10 bg-black/20 p-4 text-left">
               <p className="text-[0.65rem] uppercase tracking-[0.4em] text-cyan-200">Original</p>
               {previewUrl ? (
-                <img src={previewUrl} alt="Ausgewähltes Originalbild" className="mt-4 h-48 w-full rounded-xl object-contain" />
+                <a href={previewUrl} target="_blank" rel="noreferrer" className="mt-4 block h-48 w-full overflow-hidden rounded-xl">
+                  <img src={previewUrl} alt="Ausgewähltes Originalbild" className="h-full w-full object-contain" />
+                </a>
               ) : (
                 <p className="mt-4 text-sm text-slate-400">Noch kein Bild ausgewählt.</p>
               )}
@@ -138,7 +178,9 @@ function App() {
             <figure className="rounded-2xl border border-white/10 bg-black/20 p-4 text-left">
               <p className="text-[0.65rem] uppercase tracking-[0.4em] text-cyan-200">Ergebnis</p>
               {resultUrl ? (
-                <img src={resultUrl} alt="Vom Backend erzeugtes Bild" className="mt-4 h-48 w-full rounded-xl object-contain" />
+                <a href={resultUrl} target="_blank" rel="noreferrer" className="mt-4 block h-48 w-full overflow-hidden rounded-xl">
+                  <img src={resultUrl} alt="Vom Backend erzeugtes Bild" className="h-full w-full object-contain" />
+                </a>
               ) : (
                 <p className="mt-4 text-sm text-slate-400">Noch kein Ergebnis.</p>
               )}
