@@ -26,7 +26,13 @@ const ENDPOINT = getPrimaryDefaceEndpoint()
 describe('imageService', () => {
   it('returns a blob URL when the backend responds with an image', async () => {
     const blob = new Blob(['data'], { type: 'image/png' })
-    server.use(rest.post(ENDPOINT, (_req, res, ctx) => ensureHeadersAll(res(ctx.status(200), ctx.body(blob)))))
+    server.use(
+      rest.post(ENDPOINT, (req, res, ctx) => {
+        expect(req.url.searchParams.get('filter_name')).toBe(FILTER_NAMES[0])
+        expect(req.url.searchParams.get('paste_ellipse_name')).toBe(PASTE_ELLIPSE_NAMES[0])
+        return ensureHeadersAll(res(ctx.status(200), ctx.body(blob)))
+      }),
+    )
 
     const file = new File(['payload'], 'photo.png', { type: 'image/png' })
     const result = await processImage(file, FILTER_NAMES[0], PASTE_ELLIPSE_NAMES[0])
@@ -36,7 +42,13 @@ describe('imageService', () => {
   })
 
   it('throws when the backend responds with an error status', async () => {
-    server.use(rest.post(ENDPOINT, (_req, res, ctx) => ensureHeadersAll(res(ctx.status(500)))))
+    server.use(
+      rest.post(ENDPOINT, (req, res, ctx) => {
+        expect(req.url.searchParams.get('filter_name')).toBe(FILTER_NAMES[0])
+        expect(req.url.searchParams.get('paste_ellipse_name')).toBe(PASTE_ELLIPSE_NAMES[0])
+        return ensureHeadersAll(res(ctx.status(500)))
+      }),
+    )
 
     const file = new File(['payload'], 'photo.png', { type: 'image/png' })
 

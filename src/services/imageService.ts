@@ -1,9 +1,7 @@
 import { FilterName, PasteEllipseName } from '../config/constants'
 import { getPrimaryDefaceEndpoint } from './apiClient'
 
-const IMAGE_FIELD_NAME = 'image'
-const FILTER_FIELD_NAME = 'filterName'
-const PASTE_FIELD_NAME = 'pasteEllipseName'
+const IMAGE_FIELD_NAME = 'input_file'
 
 export const processImage = async (
   file: File,
@@ -12,10 +10,12 @@ export const processImage = async (
 ): Promise<string> => {
   const formData = new FormData()
   formData.append(IMAGE_FIELD_NAME, file)
-  formData.append(FILTER_FIELD_NAME, filterName)
-  formData.append(PASTE_FIELD_NAME, pasteEllipseName)
 
-  const response = await fetch(getPrimaryDefaceEndpoint(), {
+  const endpoint = new URL(getPrimaryDefaceEndpoint())
+  endpoint.searchParams.set('filter_name', filterName)
+  endpoint.searchParams.set('paste_ellipse_name', pasteEllipseName)
+
+  const response = await fetch(endpoint.toString(), {
     method: 'POST',
     body: formData,
   })
