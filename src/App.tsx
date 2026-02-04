@@ -145,7 +145,6 @@ function App() {
                   accept="image/*"
                   className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white transition focus:border-cyan-400 focus:outline-none"
                   onChange={handleFileChange}
-                  capture="environment"
                 />
                 {selectedFile && (
                   <div className="mt-2 space-y-1">
