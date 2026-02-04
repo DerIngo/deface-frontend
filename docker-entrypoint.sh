@@ -1,11 +1,14 @@
 #!/bin/sh
 set -e
 
-# Replace placeholder in env-config.js with actual environment variable values (if present)
-if [ -f /usr/share/nginx/html/env-config.js ]; then
-  V="${VITE_IMAGE_DEFACE_ENDPOINT:-}"
-  # Use | as sed delimiter to avoid escaping slashes in URLs
-  sed -i "s|%%VITE_IMAGE_DEFACE_ENDPOINT%%|${V}|g" /usr/share/nginx/html/env-config.js
-fi
+# Write a small runtime config JS that the app can read. This avoids sed escaping issues.
+OUT=/usr/share/nginx/html/env-config.js
+V="${VITE_IMAGE_DEFACE_ENDPOINT:-}"
+
+cat > "$OUT" <<EOF
+window.__env = {
+  VITE_IMAGE_DEFACE_ENDPOINT: "$V"
+}
+EOF
 
 exec nginx -g 'daemon off;'
