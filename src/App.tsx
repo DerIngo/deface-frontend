@@ -21,9 +21,16 @@ function App() {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0] ?? null
-    setSelectedFile(file)
-    setError(null)
-    setPreviewUrl(() => (file ? URL.createObjectURL(file) : null))
+    if (file) {
+      // Verwende immer die Original-Datei, keine komprimierte Version
+      // Stelle sicher, dass die Datei gelesen wird, wie sie ist
+      setSelectedFile(file)
+      setError(null)
+      setPreviewUrl(() => URL.createObjectURL(file))
+    } else {
+      setSelectedFile(null)
+      setPreviewUrl(null)
+    }
   }
 
   useEffect(() => {
@@ -138,8 +145,14 @@ function App() {
                   accept="image/*"
                   className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white transition focus:border-cyan-400 focus:outline-none"
                   onChange={handleFileChange}
+                  capture="environment"
                 />
-                {selectedFile && <p className="mt-2 text-xs text-slate-300">{selectedFile.name}</p>}
+                {selectedFile && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-slate-300">Datei: {selectedFile.name}</p>
+                    <p className="text-xs text-slate-400">Größe: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB · Typ: {selectedFile.type || 'unbekannt'}</p>
+                  </div>
+                )}
               </label>
               <button
                 type="submit"
