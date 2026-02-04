@@ -1,0 +1,3 @@
+window.__env = {
+  VITE_IMAGE_DEFACE_ENDPOINT: "%%VITE_IMAGE_DEFACE_ENDPOINT%%"
+}
